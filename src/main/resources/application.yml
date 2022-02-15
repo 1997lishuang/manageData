@@ -36,3 +36,9 @@ mybatis-plus:
     map-underscore-to-camel-case: true
     cache-enabled: false
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl #开启sql日志
+
+#  thymeleaf:
+#    mode: HTML
+#    encoding: utf-8
+#    cache: false
+#    prefix: classpath:/templates/

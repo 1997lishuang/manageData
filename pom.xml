@@ -152,7 +152,16 @@
             <version>3.16</version>
         </dependency>
 
-
+<!--        &lt;!&ndash; SpringBoot集成thymeleaf模板 &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-thymeleaf</artifactId>-->
+<!--        </dependency>-->
+<!--        &lt;!&ndash; thymeleaf网页解析 &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>net.sourceforge.nekohtml</groupId>-->
+<!--            <artifactId>nekohtml</artifactId>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>ooxml-schemas</artifactId>
