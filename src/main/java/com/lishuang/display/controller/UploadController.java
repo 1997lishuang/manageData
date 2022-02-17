@@ -13,23 +13,26 @@ import com.lishuang.display.model.ReadData;
 import com.lishuang.display.model.Redcaveconvergence;
 import com.lishuang.display.service.impl.PreservenameServiceImpl;
 import com.lishuang.display.service.impl.RedcaveconvergenceServiceImpl;
+import org.apache.poi.util.IOUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ResourceUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.activation.MimetypesFileTypeMap;
+import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.swing.filechooser.FileSystemView;
 import java.io.*;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -40,6 +43,10 @@ import java.util.*;
 @RequestMapping("/Upload")
 
 public class UploadController {
+
+    @Resource
+    private ResourceLoader resourceLoader;
+
 
     @Autowired
     private HttpServletRequest request;
@@ -158,86 +165,106 @@ public class UploadController {
 
 
 
-    /*
-       word模板下载
-     */
-    @RequestMapping("downWord")
-    @ResponseBody
-    @CrossOrigin
-    public R downWord(String templatesName) throws FileNotFoundException {
+//    /*
+//       word模板下载
+//     */
+//    @RequestMapping("downWord")
+//    @ResponseBody
+//    public void downWord(String templatesName) {
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//        try {
+//
+//            request.setCharacterEncoding("utf-8");
+//
+////            fileName = new String(fileName.getBytes("iso-8859-1"), "utf-8");
+//
+////获取文件路径
+//            File file = null;
+//            try {
+//                file = ResourceUtils.getFile("classpath:templates");
+//            } catch (FileNotFoundException e) {
+//                e.printStackTrace();
+//            }
+//            String path = file.getAbsolutePath();
+//            String filePath = path + "\\" + templatesName + ".docx";
+//
+//
+//            filePath = filePath == null ? "" : filePath;
+//
+//
+//            File f = new File(filePath);
+//            System.out.println(filePath);
+//            if (!f.exists()) {
+//                try {
+//                    response.sendError(404, "File not found!");
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//            BufferedInputStream br = null;
+//            try {
+//                br = new BufferedInputStream(new FileInputStream(f));
+//            } catch (FileNotFoundException e) {
+//                e.printStackTrace();
+//            }
+//            byte[] buf = new byte[1024];
+//            int len = 0;
+//            response.reset(); // 非常重要
+//            response.setContentType("application/msword");
+////            response.setContentType("application/octet-stream");
+//            response.setHeader("Content-Disposition", "attachment; filename=" + f.getName());
+//            response.setHeader("Access-Control-Allow-Origin", "*");
+//            OutputStream out = null;
+//            try {
+//                out = response.getOutputStream();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            System.out.println("222");
+//            while (true){
+//                try {
+//                    if (!((len = br.read(buf)) > 0)) break;
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//                try {
+//                    out.write(buf, 0, len);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//            try {
+//                br.close();
+//                out.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//
+//
+//
+//        } catch (UnsupportedEncodingException e) {
+//
+//            e.printStackTrace();
+//
+//        }
+//
+//    }
 
 
-        String substring = templatesName.substring(0, 4);
-
-        String eqName =  substring+ ".docx";
-
-        String path = ResourceUtils.getURL("classpath:").getPath();
-        System.out.println(path);
-
-        File file = null;
-        try {
-            file = ResourceUtils.getFile("classpath:templates");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        if(file.exists()){
-
-            File[] files = file.listFiles();
-            if(files != null){
-                for(File childFile:files){
-                    if(eqName.equals(childFile.getName())){
-
-
-                        //下载的文件路径
-                        String filePath = "src/main/resources/templates/"+eqName;
-                        // 开始下载文件
-                        InputStream in = null;
-                        try {
-                            // 1.设置文件ContentType类型，这样设置，会自动判断下载文件类型
-                            response.setContentType("multipart/form-data");
-                            // 2.设置文件头：最后一个参数是设置下载文件名
-                            response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
-
-                            response.addHeader("Content-Disposition",
-                                    "attachment;filename=" + new String("word模板.docx".getBytes(), "ISO-8859-1"));
-
-                            in = new FileInputStream(new File(filePath));
-
-                            // 3.通过response获取ServletOutputStream对象(out)
-                            int b = 0;
-                            byte[] buffer = new byte[512];
-                            while (b != -1) {
-                                b = in.read(buffer);
-                                if (b != -1) {
-                                    response.getOutputStream().write(buffer, 0, b);// 4.写到输出流(out)中
-                                }
-
-                            }
-                        } catch (Exception e) {
-                        } finally {
-                            try {
-                                if (in != null) {
-                                    in.close();
-                                }
-                                response.getOutputStream().flush();
-
-
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-
-                    }
-
-                }
-            }
-        }
-
-
-        return null;
-
-    }
     /*
          循环导出 word 方法
      */
@@ -391,4 +418,74 @@ public class UploadController {
     }
 
 
+
+
+
+
+    @GetMapping("/downWord")
+    @ResponseBody
+    public void downloadTemplate(String templatesName) {
+
+//
+//        File file = null;
+//        try {
+//            file = ResourceUtils.getFile("classpath:templates");
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//
+//        String path = file.getAbsolutePath();
+//        String filePath = path + "\\" + templatesName + ".docx";
+
+
+
+        InputStream inputStream = null;
+        ServletOutputStream servletOutputStream = null;
+        try {
+            String filename = templatesName+".docx";
+            String path = "templates/"+templatesName+".docx";
+            org.springframework.core.io.Resource resource = resourceLoader.getResource("classpath:"+path);
+
+            response.setContentType("application/vnd.ms-excel");
+            response.addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+            response.addHeader("charset", "utf-8");
+            response.addHeader("Pragma", "no-cache");
+            String encodeName = URLEncoder.encode(filename, StandardCharsets.UTF_8.toString());
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + encodeName + "\"; filename*=utf-8''" + encodeName);
+
+            inputStream = resource.getInputStream();
+            servletOutputStream = response.getOutputStream();
+            IOUtils.copy(inputStream, servletOutputStream);
+            response.flushBuffer();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (servletOutputStream != null) {
+                    servletOutputStream.close();
+                    servletOutputStream = null;
+                }
+                if (inputStream != null) {
+                    inputStream.close();
+                    inputStream = null;
+                }
+                // 召唤jvm的垃圾回收器
+                System.gc();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+
+    }
+
+
+
+
 }
+
+
+
+
+
+
