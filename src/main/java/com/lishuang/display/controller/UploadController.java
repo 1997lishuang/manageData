@@ -8,8 +8,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.lishuang.display.commonutils.ExportWordUtil;
 import com.lishuang.display.commonutils.R;
 import com.lishuang.display.mapper.RedcaveconvergenceMapper;
+import com.lishuang.display.model.Preservename;
 import com.lishuang.display.model.ReadData;
 import com.lishuang.display.model.Redcaveconvergence;
+import com.lishuang.display.service.impl.PreservenameServiceImpl;
 import com.lishuang.display.service.impl.RedcaveconvergenceServiceImpl;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,8 +50,11 @@ public class UploadController {
     @Autowired
     public RedcaveconvergenceServiceImpl redcaveconvergenceService;
 
-     @Autowired
-     public RedcaveconvergenceMapper redcaveconvergenceMapper;
+    @Autowired
+    public RedcaveconvergenceMapper redcaveconvergenceMapper;
+
+    @Autowired
+    public PreservenameServiceImpl preservenameService;
 
     @Autowired
     public UploadController uploadController;
@@ -116,22 +121,39 @@ public class UploadController {
         //获取原始的名字  original:最初的，起始的  方法是得到原来的文件名在客户机的文件系统名称
         String oldName = multipartFile.getOriginalFilename();
 
-//        String newName = UUID.randomUUID().toString() + oldName.substring(oldName.lastIndexOf("."),oldName.length());
+        System.out.println(oldName);
+        String[] split = oldName.split("\\.");
+        String tunnelName = split[0];
 
-        try {
-            //构建真实的文件路径
-            File newFile = new File(file.getAbsolutePath() + File.separator + oldName);
-            //转存文件到指定路径，如果文件名重复的话，将会覆盖掉之前的文件,这里是把文件上传到 “绝对路径”
-            multipartFile.transferTo(newFile);
+
+
+        Preservename preservename = new Preservename();
+        preservename.setTunnelName(tunnelName);
+
+        boolean save = preservenameService.save(preservename);
+
+        if(save){
+            try {
+                //构建真实的文件路径
+                File newFile = new File(file.getAbsolutePath() + File.separator + oldName);
+                //转存文件到指定路径，如果文件名重复的话，将会覆盖掉之前的文件,这里是把文件上传到 “绝对路径”
+                multipartFile.transferTo(newFile);
 //            String filePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + "/uploadFile/" + format + newName;
 
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             return R.ok();
-        } catch (Exception e) {
-            e.printStackTrace();
+        }
+
+        else {
+            return R.error();
         }
 
 
-        return R.ok();
+//        String newName = UUID.randomUUID().toString() + oldName.substring(oldName.lastIndexOf("."),oldName.length());
+
+
     }
 
 
@@ -174,6 +196,7 @@ public class UploadController {
                             // 1.设置文件ContentType类型，这样设置，会自动判断下载文件类型
                             response.setContentType("multipart/form-data");
                             // 2.设置文件头：最后一个参数是设置下载文件名
+                            response.setHeader("Access-Control-Expose-Headers","Content-Disposition");
 
                             response.addHeader("Content-Disposition",
                                     "attachment;filename=" + new String("word模板.docx".getBytes(), "ISO-8859-1"));
@@ -205,36 +228,6 @@ public class UploadController {
                         }
 
 
-
-
-
-//                        //下载的文件路径
-//                        String filePath = "src/main/resources/templates/"+eqName;
-//                        System.out.println(filePath);
-//                        //下载后显示的文件名
-//                        String fileName = "word模板文件";
-//                            //使用流的形式下载文件
-//                        try (
-//                                InputStream is = new FileInputStream(filePath);
-//                                OutputStream os = new BufferedOutputStream(response.getOutputStream());
-//                        ) {
-//                            byte[] buffer = new byte[is.available()];
-//                            is.read(buffer);
-//                            response.reset();
-//                            response.addHeader("Access-Control-Allow-Origin","*");
-//                            response.setContentType("application/octet-stream");
-//                            response.addHeader("Content-Disposition", "attachment;filename=" + new String(fileName.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1));
-//                            response.addHeader("Content-Length", "" + buffer.length);
-//                            os.write(buffer);
-//                            os.flush();
-//                            os.close();
-//                            is.close();
-//                            return null;
-//                        } catch (Exception e) {
-//                            e.printStackTrace();
-//                            return R.error();
-//                        }
-
                     }
 
                 }
@@ -254,33 +247,38 @@ public class UploadController {
     @ResponseBody
     public void getZbrzWord(@RequestParam String location) {
 
+        List<Preservename> list = preservenameService.list();
 
-       switch (location){
-           case "永安隧洞":
-               uploadController.chooseWord(location);
-               break;
-           case "圣中水库":
-               uploadController.chooseWord(location);
-               break;
-           case "双桥隧洞":
-               uploadController.chooseWord(location);
-               break;
-           case "千盐隧洞":
-               uploadController.chooseWord(location);
-               break;
-           case "石竹隧洞":
-               uploadController.chooseWord(location);
-               break;
-           case "陈食隧洞":
-               uploadController.chooseWord(location);
-               break;
-           case "王家湾隧洞":
-               uploadController.chooseWord(location);
-               break;
-           default:
-               break;
+       for(int i=0;i<list.size();i++){
+                if(list.get(i).getTunnelName().equals(location)){
+                    uploadController.chooseWord(location);
+                }
        }
-
+//        switch (location){
+//           case "永安隧洞":
+//               uploadController.chooseWord(location);
+//               break;
+//           case "圣中水库":
+//               uploadController.chooseWord(location);
+//               break;
+//           case "双桥隧洞":
+//               uploadController.chooseWord(location);
+//               break;
+//           case "千盐隧洞":
+//               uploadController.chooseWord(location);
+//               break;
+//           case "石竹隧洞":
+//               uploadController.chooseWord(location);
+//               break;
+//           case "陈食隧洞":
+//               uploadController.chooseWord(location);
+//               break;
+//           case "王家湾隧洞":
+//               uploadController.chooseWord(location);
+//               break;
+//           default:
+//               break;
+//       }
 
 
     }
@@ -389,7 +387,7 @@ public class UploadController {
 
 
 
-        redcaveconvergenceMapper.deleteRedcave();
+//        redcaveconvergenceMapper.deleteRedcave();
     }
 
 

@@ -140,17 +140,17 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi</artifactId>
-            <version>3.16</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.apache.poi</groupId>-->
+<!--            <artifactId>poi</artifactId>-->
+<!--            <version>3.16</version>-->
+<!--        </dependency>-->
 
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi-ooxml</artifactId>
-            <version>3.16</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.apache.poi</groupId>-->
+<!--            <artifactId>poi-ooxml</artifactId>-->
+<!--            <version>3.16</version>-->
+<!--        </dependency>-->
 
 <!--        &lt;!&ndash; SpringBoot集成thymeleaf模板 &ndash;&gt;-->
 <!--        <dependency>-->
@@ -171,15 +171,14 @@
 
         <!--注意:word中要使用循环等标签必须单独导入以下依赖-->
         <!-- https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml-schemas -->
-<!--        <dependency>-->
-<!--            <groupId>org.apache.poi</groupId>-->
-<!--            <artifactId>poi-ooxml-schemas</artifactId>-->
-<!--            <version>3.17</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml-schemas</artifactId>
+            <version>3.17</version>
+        </dependency>
 <!--        <dependency>-->
 <!--            <groupId>org.apache.poi</groupId>-->
 <!--            <artifactId>poi-scratchpad</artifactId>-->
-<!--            <version>${poi-ooxml.version}</version>-->
 <!--        </dependency>-->
 
 
