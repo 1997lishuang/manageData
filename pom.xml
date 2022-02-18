@@ -167,7 +167,12 @@
             <artifactId>ooxml-schemas</artifactId>
             <version>1.1</version>
         </dependency>
-
+       <!--汉字转化为拼音-->
+        <dependency>
+            <groupId>com.belerweb</groupId>
+            <artifactId>pinyin4j</artifactId>
+            <version>2.5.0</version>
+        </dependency>
 
         <!--注意:word中要使用循环等标签必须单独导入以下依赖-->
         <!-- https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml-schemas -->

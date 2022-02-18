@@ -29,7 +29,7 @@ public class ExportWordUtil {
      * <p>第三步删除生成的临时文件</p>
      * 模版变量中变量格式：{{foo}}
      * @param templatePath word模板地址
-     * @param temDir 生成临时文件存放地址
+     * @param    temDir 生成临时文件存放地址
      * @param fileName 文件名
      * @param params 替换的参数
      * @param request HttpServletRequest
@@ -50,36 +50,25 @@ public class ExportWordUtil {
         try {
             String userAgent = request.getHeader("user-agent").toLowerCase();
             if (userAgent.contains("msie") || userAgent.contains("like gecko")) {
+
                 fileName = URLEncoder.encode(fileName, "UTF-8");
             } else {
                 fileName = new String(fileName.getBytes("utf-8"), "ISO-8859-1");
             }
             XWPFDocument doc = WordExportUtil.exportWord07(templatePath, params);
 
-//            List<XWPFTable> XWPFTables = doc.getTables();
-//            int fromRow = 1;
-//            int toRow = 0;
-//            for(XWPFTable table:XWPFTables){
-//                  for(int rowIndex= fromRow;rowIndex<toRow+table.getNumberOfRows()-1;rowIndex++){
-//                      XWPFTableCell cell = table.getRow(rowIndex).getCell(2);
-//                      if(rowIndex==fromRow){
-//                          cell.getCTTc().addNewTcPr().addNewVMerge().setVal(STMerge.RESTART);
-//                      }else {
-//                          cell.getCTTc().addNewTcPr().addNewVMerge().setVal(STMerge.CONTINUE);
-//                      }
-//                  }
-//
-//
-//            }
+
 
 
             String tmpPath = temDir + fileName;
+            System.out.println(tmpPath);
             FileOutputStream fos = new FileOutputStream(tmpPath);
             doc.write(fos);
             // 设置强制下载不打开
-            response.setContentType("application/force-download");
+//            response.setContentType("application/force-download");
             // 设置文件名
-            response.addHeader("Content-Disposition", "attachment;fileName=" + fileName);
+            response.addHeader("Content-Disposition", "attachment;filename*= UTF-8''"+ URLEncoder.encode(fileName,"UTF-8"));
+
             OutputStream out = response.getOutputStream();
             doc.write(out);
             out.close();

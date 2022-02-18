@@ -13,6 +13,12 @@ import com.lishuang.display.model.ReadData;
 import com.lishuang.display.model.Redcaveconvergence;
 import com.lishuang.display.service.impl.PreservenameServiceImpl;
 import com.lishuang.display.service.impl.RedcaveconvergenceServiceImpl;
+import net.sourceforge.pinyin4j.PinyinHelper;
+import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
+import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
+import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
+import net.sourceforge.pinyin4j.format.HanyuPinyinVCharType;
+import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
 import org.apache.poi.util.IOUtils;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -165,105 +171,6 @@ public class UploadController {
 
 
 
-//    /*
-//       word模板下载
-//     */
-//    @RequestMapping("downWord")
-//    @ResponseBody
-//    public void downWord(String templatesName) {
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//        try {
-//
-//            request.setCharacterEncoding("utf-8");
-//
-////            fileName = new String(fileName.getBytes("iso-8859-1"), "utf-8");
-//
-////获取文件路径
-//            File file = null;
-//            try {
-//                file = ResourceUtils.getFile("classpath:templates");
-//            } catch (FileNotFoundException e) {
-//                e.printStackTrace();
-//            }
-//            String path = file.getAbsolutePath();
-//            String filePath = path + "\\" + templatesName + ".docx";
-//
-//
-//            filePath = filePath == null ? "" : filePath;
-//
-//
-//            File f = new File(filePath);
-//            System.out.println(filePath);
-//            if (!f.exists()) {
-//                try {
-//                    response.sendError(404, "File not found!");
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//            BufferedInputStream br = null;
-//            try {
-//                br = new BufferedInputStream(new FileInputStream(f));
-//            } catch (FileNotFoundException e) {
-//                e.printStackTrace();
-//            }
-//            byte[] buf = new byte[1024];
-//            int len = 0;
-//            response.reset(); // 非常重要
-//            response.setContentType("application/msword");
-////            response.setContentType("application/octet-stream");
-//            response.setHeader("Content-Disposition", "attachment; filename=" + f.getName());
-//            response.setHeader("Access-Control-Allow-Origin", "*");
-//            OutputStream out = null;
-//            try {
-//                out = response.getOutputStream();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//            System.out.println("222");
-//            while (true){
-//                try {
-//                    if (!((len = br.read(buf)) > 0)) break;
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//                try {
-//                    out.write(buf, 0, len);
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//            try {
-//                br.close();
-//                out.close();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//
-//
-//
-//
-//        } catch (UnsupportedEncodingException e) {
-//
-//            e.printStackTrace();
-//
-//        }
-//
-//    }
-
 
     /*
          循环导出 word 方法
@@ -281,31 +188,7 @@ public class UploadController {
                     uploadController.chooseWord(location);
                 }
        }
-//        switch (location){
-//           case "永安隧洞":
-//               uploadController.chooseWord(location);
-//               break;
-//           case "圣中水库":
-//               uploadController.chooseWord(location);
-//               break;
-//           case "双桥隧洞":
-//               uploadController.chooseWord(location);
-//               break;
-//           case "千盐隧洞":
-//               uploadController.chooseWord(location);
-//               break;
-//           case "石竹隧洞":
-//               uploadController.chooseWord(location);
-//               break;
-//           case "陈食隧洞":
-//               uploadController.chooseWord(location);
-//               break;
-//           case "王家湾隧洞":
-//               uploadController.chooseWord(location);
-//               break;
-//           default:
-//               break;
-//       }
+
 
 
     }
@@ -319,13 +202,16 @@ public class UploadController {
 
         //生成临时文件地址
 
+        String filePath = new String("src/main/resources/templates/tunnelmodel/");
 
-        File desktopDir = FileSystemView.getFileSystemView() .getHomeDirectory();
+        System.out.println(filePath);
 
-        String desktopPath = desktopDir.getAbsolutePath();
-
-//        String filePath = "C:\\Users\\lishuang\\Desktop\\";
-        String filePath = desktopPath;
+//        File desktopDir = FileSystemView.getFileSystemView() .getHomeDirectory();
+//
+//        String desktopPath = desktopDir.getAbsolutePath();
+//
+////        String filePath = "C:\\Users\\lishuang\\Desktop\\";
+//        String filePath = desktopPath;
 
 
         List<Map<String,Object>> dataList= new ArrayList<>();
@@ -333,8 +219,8 @@ public class UploadController {
           准备填充数据
          */
         String newLocation = location.substring(0, 2);
-        System.out.println("111");
-        System.out.println(newLocation);
+
+
         QueryWrapper findStation = new QueryWrapper();
 
         findStation.like("monitor_place",newLocation);
@@ -407,9 +293,41 @@ public class UploadController {
 
 
             params.put("end",simpleDateFormat.format(redCaveList.get(0).getEndTime()));
+
+
+            String fileName = location+".docx";
+
+
+
+            HanyuPinyinOutputFormat formart = new HanyuPinyinOutputFormat();
+            formart.setCaseType(HanyuPinyinCaseType.LOWERCASE);
+            formart.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
+            formart.setVCharType(HanyuPinyinVCharType.WITH_V);
+            char[] arrays = fileName.trim().toCharArray();
+            String result = "";
+            for (int i=0;i<arrays.length;i++) {
+                char ti = arrays[i];
+                if(Character.toString(ti).matches("[\\u4e00-\\u9fa5]")){ //匹配是否是中文
+                    String[] temp = new String[0];
+                    try {
+                        temp = PinyinHelper.toHanyuPinyinStringArray(ti,formart);
+                    } catch (BadHanyuPinyinOutputFormatCombination badHanyuPinyinOutputFormatCombination) {
+                        badHanyuPinyinOutputFormatCombination.printStackTrace();
+                    }
+                    result += temp[0];
+                }else{
+                    result += ti;
+                }
+            }
+
+
+            String NewfileName =result;
+
+            ExportWordUtil.exportWord(wordModelPath,filePath,NewfileName,params,request,response);
         }
 
-            ExportWordUtil.exportWord(wordModelPath,filePath,"weekly.docx",params,request,response);
+
+        uploadController.downloadTunnelTemplate(location);
 
 
 
@@ -426,16 +344,6 @@ public class UploadController {
     @ResponseBody
     public void downloadTemplate(String templatesName) {
 
-//
-//        File file = null;
-//        try {
-//            file = ResourceUtils.getFile("classpath:templates");
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        }
-//
-//        String path = file.getAbsolutePath();
-//        String filePath = path + "\\" + templatesName + ".docx";
 
 
 
@@ -444,6 +352,8 @@ public class UploadController {
         try {
             String filename = templatesName+".docx";
             String path = "templates/"+templatesName+".docx";
+
+
             org.springframework.core.io.Resource resource = resourceLoader.getResource("classpath:"+path);
 
             response.setContentType("application/vnd.ms-excel");
@@ -480,6 +390,78 @@ public class UploadController {
     }
 
 
+
+
+    @GetMapping("/downloadTunnelTemplate")
+    @ResponseBody
+    public void downloadTunnelTemplate(String templatesName) {
+
+
+        HanyuPinyinOutputFormat formart = new HanyuPinyinOutputFormat();
+        formart.setCaseType(HanyuPinyinCaseType.LOWERCASE);
+        formart.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
+        formart.setVCharType(HanyuPinyinVCharType.WITH_V);
+        char[] arrays = templatesName.trim().toCharArray();
+        String result = "";
+        for (int i=0;i<arrays.length;i++) {
+            char ti = arrays[i];
+            if(Character.toString(ti).matches("[\\u4e00-\\u9fa5]")){ //匹配是否是中文
+                String[] temp = new String[0];
+                try {
+                    temp = PinyinHelper.toHanyuPinyinStringArray(ti,formart);
+                } catch (BadHanyuPinyinOutputFormatCombination badHanyuPinyinOutputFormatCombination) {
+                    badHanyuPinyinOutputFormatCombination.printStackTrace();
+                }
+                result += temp[0];
+            }else{
+                result += ti;
+            }
+        }
+
+
+        String NewfileName =result;
+
+
+        InputStream inputStream = null;
+        ServletOutputStream servletOutputStream = null;
+        try {
+            String filename = NewfileName+".docx";
+            String path = "templates/tunnelmodel/"+NewfileName+".docx";
+            System.out.println(path);
+            org.springframework.core.io.Resource resource = resourceLoader.getResource("classpath:"+path);
+
+            response.setContentType("application/vnd.ms-excel");
+            response.addHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+            response.addHeader("charset", "utf-8");
+            response.addHeader("Pragma", "no-cache");
+            String encodeName = URLEncoder.encode(templatesName, StandardCharsets.UTF_8.toString());
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + encodeName + "\"; filename*=utf-8''" + encodeName);
+
+            inputStream = resource.getInputStream();
+            servletOutputStream = response.getOutputStream();
+            IOUtils.copy(inputStream, servletOutputStream);
+            response.flushBuffer();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (servletOutputStream != null) {
+                    servletOutputStream.close();
+                    servletOutputStream = null;
+                }
+                if (inputStream != null) {
+                    inputStream.close();
+                    inputStream = null;
+                }
+                // 召唤jvm的垃圾回收器
+                System.gc();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+
+    }
 
 
 }
